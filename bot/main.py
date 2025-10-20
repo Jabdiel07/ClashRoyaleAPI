@@ -29,8 +29,7 @@ async def ping_slash(interaction: discord.Interaction):
 async def user_command(interaction: discord.Interaction, user_id: str):
     message = get_player_info(user_id)
     await interaction.response.send_message(f'Player Info:\n{message}')
-    #await interaction.response.send_message(f'You entered user ID: {user_id}')
-
+    
 if __name__ == '__main__':
     if not DISCORD_TOKEN:
         raise RuntimeError('DISCORD_TOKEN is missing. Put it in your .env file.')
