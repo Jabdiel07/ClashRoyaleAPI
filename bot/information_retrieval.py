@@ -2,6 +2,8 @@ import requests
 import json
 import os
 from dotenv import load_dotenv
+import math
+from datetime import datetime
 
 '''
 
@@ -36,6 +38,10 @@ def user_battlelog_card(data):
     team = latest_battle.get('team', [])
     opponent = latest_battle.get('opponent', [])
 
+    battle_time = latest_battle.get('battleTime', 'N/A')
+    dt = datetime.strptime(battle_time, '%Y%m%dT%H%M%S.%fZ')
+    formatted_battle_time = dt.strftime('%B %d, %Y')
+
     player1 = team[0]
     player_name = player1.get('name', 'Unknown')
     player_tag = player1.get('tag', 'N/A')
@@ -52,7 +58,7 @@ def user_battlelog_card(data):
     opponent_cards_used, opponent_evos_used, opponent_num_evos_used = get_battlelog_cards(player2)
 
 
-    return f'Player Name 🫅: {player_name}\nPlayer Tag #️⃣: {player_tag}\nClan 🏰: {player_clan}\nTowers Destroyed 💥: {player_crowns}\nCards Used 🃏: {player_cards_used}\nEvos Used ♦️:({num_evos_used}): {player_evos_used}\n\nOpponent Name 🫅: {opponent_name}\nPlayer Tag #️⃣: {opponent_tag}\nClan 🏰: {opponent_clan}\nTowers Destroyed 💥: {opponent_crowns}\nCards Used 🃏: {opponent_cards_used}\nEvos Used ♦️:({opponent_num_evos_used}): {opponent_evos_used}'
+    return f'Date of Battle 🕒: {formatted_battle_time}\n\nPlayer Name 🫅: {player_name}\nPlayer Tag #️⃣: {player_tag}\nClan 🏰: {player_clan}\nTowers Destroyed 💥: {player_crowns}\nCards Used 🃏: {player_cards_used}\nEvos Used ♦️:({num_evos_used}): {player_evos_used}\n\nOpponent Name 🫅: {opponent_name}\nPlayer Tag #️⃣: {opponent_tag}\nClan 🏰: {opponent_clan}\nTowers Destroyed 💥: {opponent_crowns}\nCards Used 🃏: {opponent_cards_used}\nEvos Used ♦️:({opponent_num_evos_used}): {opponent_evos_used}'
 
 def get_battlelog_cards(user):
     cards_used = []
@@ -101,8 +107,47 @@ def create_player_info_card(data):
     best_trophies = data.get('bestTrophies', 'N/A')
     clan = data.get('clan', {}).get('name', 'No Clan')
     evos, num_of_evos = find_evos(data)
+    player_wins = data.get('wins', 0)
+    player_matches_played = data.get('battleCount', 0)
+    player_win_rate = (player_wins / player_matches_played) * 100 if player_matches_played > 0 else 0
 
-    return f'Player 🫅: {player_name}\nPlayer Level 🌟: {level}\nTrophies 🏆: {trophies}\nBest Trophies 🥇: {best_trophies}\nArena ⚔️: {arena}\nClan 🏰: {clan}\nEvos ({num_of_evos}) ♦️: {evos}'
+    return f'Player 🫅: {player_name}\nPlayer Level 🌟: {level}\nTrophies 🏆: {trophies}\nBest Trophies 🥇: {best_trophies}\nWin Rate 🟢: {math.ceil(player_win_rate)}%\nArena ⚔️: {arena}\nClan 🏰: {clan}\nEvos ({num_of_evos}) ♦️: {evos}'
+
+
+def get_clan_info(clan_tag):
+    CLASH_API_KEY = os.getenv('CLASH_API_KEY')
+
+    if not CLASH_API_KEY:
+        raise RuntimeError('CLASH_API_KEY is missing. Put it in your .env file.')
+    
+    request = requests.get(f'https://api.clashroyale.com/v1/clans/%23{clan_tag.upper()}', headers={'Accept': 'application/json', 'Authorization': f'Bearer {CLASH_API_KEY}'})
+
+    data = request.json()
+
+    if request.status_code == 200:
+        return create_clan_info_card(data)
+    else:
+        return f"Error: {data.get('message', 'Unknown error occurred')}"
+
+def create_clan_info_card(data):
+    clan_name = data.get('name', 'Unknown')
+    clan_description = data.get('description', 'No description')
+    clan_required_trophies = data.get('reqiredTrophies', 0)
+    clan_type = data.get('type', 'N/A')
+    clan_location = data.get('location', {}).get('name', 'N/A')
+    clan_clanWar_trophies = data.get('clanWarTrophies', 0)
+    clan_members = data.get('members', 0)
+    top_three_players = get_top_three_players_clan(data)
+
+    return f'Clan Name 🏰: {clan_name}\nDescription 📝: {clan_description}\nType 🔰: {clan_type}\nLocation 📍: {clan_location}\nClan War Trophies ⚔️: {clan_clanWar_trophies}\nRequired Trophies 🏆: {clan_required_trophies}\nMembers 👥: {clan_members}\nTop 3 Players 🥇: {top_three_players}'
+
+
+def get_top_three_players_clan(data):
+    members = data.get('memberList', [])
+    top_three = [member.get('name', 'Unknown') for member in members[:3]]
+    
+    return ', '.join(top_three)
+
 
 
 def jprint(data):

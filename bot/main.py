@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from discord import app_commands
 from information_retrieval import get_player_info
 from information_retrieval import get_player_battlelog
+from information_retrieval import get_clan_info
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
@@ -36,6 +37,12 @@ async def user_info_command(interaction: discord.Interaction, user_id: str):
 async def user_battlelog_command(interaction: discord.Interaction, user_id: str):
     message = get_player_battlelog(user_id)
     await interaction.response.send_message(f'Recent battle log:\n\n{message}')
+
+@bot.tree.command(name='clan_info', description='Get Clash Royale clan information using the clan tag id')
+@app_commands.describe(clan_id='The clan tag id (don\'t include the #)')
+async def clan_info_command(interaction: discord.Interaction, clan_id: str):
+    message = get_clan_info(clan_id)
+    await interaction.response.send_message(f'Clan Info:\n\n{message}')
 
 if __name__ == '__main__':
     if not DISCORD_TOKEN:
