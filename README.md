@@ -58,9 +58,9 @@ pyhton main.py
 
 2. Run the commands in Discord
 
-/user_info
-/user_battlelog
-/clan_info
+/user_info  
+/user_battlelog  
+/clan_info  
 
 # Troubleshooting
 
