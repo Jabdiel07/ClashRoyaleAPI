@@ -100,18 +100,37 @@ def find_evos(data):
     return string, number_of_evos
 
 def create_player_info_card(data):
+    ranks = {0: 'Unranked', 1: 'Bronze', 2: 'Silver', 3: 'Gold', 4: 'Diamond', 5: 'Master I', 6: 'Master II', 7: 'Master III', 6: 'Champion', 9: 'Grand Champion', 10: 'Ultimate Champion'}
+
     player_name = data.get('name', 'Unknown')
     level = data.get('expLevel', 'N/A')
     trophies = data.get('trophies', 'N/A')
+    past_10k_trophies = data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('trophies', 0)
+    past_10k_best_trophies = data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('bestTrophies', 0)
     arena = data.get('arena', {}).get('name', 'N/A')
     best_trophies = data.get('bestTrophies', 'N/A')
+    currentPathOfLegendTrophies = data.get('currentPathOfLegendSeasonResult', {}).get('trophies', 0)
+    bestPathOfLegendTrophies = data.get('bestPathOfLegendSeasonResult', {}).get('trophies', 0)
     clan = data.get('clan', {}).get('name', 'No Clan')
     evos, num_of_evos = find_evos(data)
     player_wins = data.get('wins', 0)
     player_matches_played = data.get('battleCount', 0)
     player_win_rate = (player_wins / player_matches_played) * 100 if player_matches_played > 0 else 0
 
-    return f'Player 🫅: {player_name}\nPlayer Level 🌟: {level}\nTrophies 🏆: {trophies}\nBest Trophies 🥇: {best_trophies}\nWin Rate 🟢: {math.ceil(player_win_rate)}%\nArena ⚔️: {arena}\nClan 🏰: {clan}\nEvos ({num_of_evos}) ♦️: {evos}'
+    current_rank_number = data.get('currentPathOfLegendSeasonResult', {}).get('leagueNumber', 'N/A')
+    best_rank_number = data.get('bestPathOfLegendSeasonResult', {}).get('leagueNumber', 'N/A')
+
+    current_rank_name = ranks.get(current_rank_number, 'N/A')
+    highest_rank_name = ranks.get(best_rank_number, 'N/A')
+
+    seasonal_arena = data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('arena', {}).get('name', 'N/A')
+
+    if past_10k_trophies > 10000 and past_10k_best_trophies > 15000:
+        return f'Player 🫅: {player_name}\nPlayer Level 🌟: {level}\nTrophies 🏆: {past_10k_trophies}\nBest Trophies 🥇: {past_10k_best_trophies}\nCurrent Path Of Legends Trophies 🏅: {currentPathOfLegendTrophies}\nBest Path Of Legends Trophies ⚜️: {bestPathOfLegendTrophies}\nCurrent Rank 🔹: {current_rank_name}\nHighest Rank 🔸: {highest_rank_name}\nSeasonal Arena 🏟️: {seasonal_arena}\nWin Rate 🟢: {math.ceil(player_win_rate)}%\nArena ⚔️: {arena}\nClan 🏰: {clan}\nEvos ({num_of_evos}) ♦️: {evos}'
+    elif past_10k_trophies > 10000:
+        return f'Player 🫅: {player_name}\nPlayer Level 🌟: {level}\nTrophies 🏆: {past_10k_trophies}\nBest Trophies 🥇: {past_10k_best_trophies}\nWin Rate 🟢: {math.ceil(player_win_rate)}%\nArena ⚔️: {arena}\nClan 🏰: {clan}\nEvos ({num_of_evos}) ♦️: {evos}'
+    else:
+        return f'Player 🫅: {player_name}\nPlayer Level 🌟: {level}\nTrophies 🏆: {trophies}\nBest Trophies 🥇: {best_trophies}\nWin Rate 🟢: {math.ceil(player_win_rate)}%\nArena ⚔️: {arena}\nClan 🏰: {clan}\nEvos ({num_of_evos}) ♦️: {evos}'
 
 
 def get_clan_info(clan_tag):
@@ -148,6 +167,13 @@ def get_top_three_players_clan(data):
     
     return ', '.join(top_three)
 
+
+def compare_players(player1_data, player2_data):
+    # function to fetch two requests, one for player 1 and one for player 2.
+    # this will follow the same structure as the get_player_info function
+    # for the retun statament, it will call another function called creare_player_comparison_card
+    # this function will follow the same structure as the create_player_info_card function, but it will compare the two players side by side
+    pass
 
 
 def jprint(data):
