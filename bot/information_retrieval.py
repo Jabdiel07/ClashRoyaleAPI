@@ -168,13 +168,82 @@ def get_top_three_players_clan(data):
     return ', '.join(top_three)
 
 
-def compare_players(player1_data, player2_data):
-    # function to fetch two requests, one for player 1 and one for player 2.
-    # this will follow the same structure as the get_player_info function
-    # for the retun statament, it will call another function called creare_player_comparison_card
-    # this function will follow the same structure as the create_player_info_card function, but it will compare the two players side by side
-    pass
+def compare_players(player_tag_1, player_tag_2):
+    CLASH_API_KEY = os.getenv('CLASH_API_KEY')
+    
+    if not CLASH_API_KEY:
+        raise RuntimeError('CLASH_API_KEY is missing. Put it in your .env file.')
 
+    request1 = requests.get(f'https://api.clashroyale.com/v1/players/%23{player_tag_1.upper()}', headers={'Accept': 'application/json', 'Authorization': f'Bearer {CLASH_API_KEY}'})
+    request2 = requests.get(f'https://api.clashroyale.com/v1/players/%23{player_tag_2.upper()}', headers={'Accept': 'application/json', 'Authorization': f'Bearer {CLASH_API_KEY}'})
+
+    player1_data = request1.json()
+    player2_data = request2.json()
+
+    if request1.status_code == 200 and request2.status_code == 200:
+        return create_player_card_comparison(player1_data, player2_data)
+    else:
+        return f"At least one of the player tags is invalid. Please check and try again."
+    
+
+def create_player_card_comparison(player1_data, player2_data):
+    ranks = {0: 'Unranked', 1: 'Bronze', 2: 'Silver', 3: 'Gold', 4: 'Diamond', 5: 'Master I', 6: 'Master II', 7: 'Master III', 6: 'Champion', 9: 'Grand Champion', 10: 'Ultimate Champion'}
+
+    player1_name = player1_data.get('name', 'Unknown')
+    player1_level = player1_data.get('expLevel', 'N/A')
+    player1_trophies = player1_data.get('trophies', 'N/A')
+    player1_past_10k_trophies = player1_data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('trophies', 0)
+    player1_past_10k_best_trophies = player1_data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('bestTrophies', 0)
+    player1_arena = player1_data.get('arena', {}).get('name', 'N/A')
+    player1_best_trophies = player1_data.get('bestTrophies', 'N/A')
+    player1_currentPathOfLegendTrophies = player1_data.get('currentPathOfLegendSeasonResult', {}).get('trophies', 0)
+    player1_bestPathOfLegendTrophies = player1_data.get('bestPathOfLegendSeasonResult', {}).get('trophies', 0)
+    player1_clan = player1_data.get('clan', {}).get('name', 'No Clan')
+    player1_evos, player1_num_of_evos = find_evos(player1_data)
+    player1_wins = player1_data.get('wins', 0)
+    player1_matches_played = player1_data.get('battleCount', 0)
+    player1_win_rate = (player1_wins / player1_matches_played) * 100 if player1_matches_played > 0 else 0
+
+    player1_current_rank_number = player1_data.get('currentPathOfLegendSeasonResult', {}).get('leagueNumber', 'N/A')
+    player1_best_rank_number = player1_data.get('bestPathOfLegendSeasonResult', {}).get('leagueNumber', 'N/A')
+
+    player1_current_rank_name = ranks.get(player1_current_rank_number, 'N/A')
+    player1_highest_rank_name = ranks.get(player1_best_rank_number, 'N/A')
+
+    player1_seasonal_arena = player1_data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('arena', {}).get('name', 'N/A')
+
+
+    player2_name = player2_data.get('name', 'Unknown')
+    player2_level = player2_data.get('expLevel', 'N/A')
+    player2_trophies = player2_data.get('trophies', 'N/A')
+    player2_past_10k_trophies = player2_data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('trophies', 0)
+    player2_past_10k_best_trophies = player2_data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('bestTrophies', 0)
+    player2_arena = player2_data.get('arena', {}).get('name', 'N/A')
+    player2_best_trophies = player2_data.get('bestTrophies', 'N/A')
+    player2_currentPathOfLegendTrophies = player2_data.get('currentPathOfLegendSeasonResult', {}).get('trophies', 0)
+    player2_bestPathOfLegendTrophies = player2_data.get('bestPathOfLegendSeasonResult', {}).get('trophies', 0)
+    player2_clan = player2_data.get('clan', {}).get('name', 'No Clan')
+    player2_evos, player2_num_of_evos = find_evos(player2_data)
+    player2_wins = player2_data.get('wins', 0)
+    player2_matches_played = player2_data.get('battleCount', 0)
+    player2_win_rate = (player2_wins / player2_matches_played) * 100 if player2_matches_played > 0 else 0
+
+    player2_current_rank_number = player2_data.get('currentPathOfLegendSeasonResult', {}).get('leagueNumber', 'N/A')
+    player2_best_rank_number = player2_data.get('bestPathOfLegendSeasonResult', {}).get('leagueNumber', 'N/A')
+
+    player2_current_rank_name = ranks.get(player2_current_rank_number, 'N/A')
+    player2_highest_rank_name = ranks.get(player2_best_rank_number, 'N/A')
+
+    player2_seasonal_arena = player2_data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('arena', {}).get('name', 'N/A')
+
+    if player1_past_10k_trophies > 10000 and player2_past_10k_trophies > 10000:
+        return f'Players🫅: {player1_name} | {player2_name}\n\nLevel 🌟: {player1_level} | {player2_level}\nTrophies 🏆: {player1_past_10k_trophies} | {player2_past_10k_trophies}\nBest Trophies 🥇: {player1_past_10k_best_trophies} | {player2_past_10k_best_trophies}\nCurrent Path Of Legends Trophies 🏅: {player1_currentPathOfLegendTrophies} | {player2_currentPathOfLegendTrophies}\nBest Path Of Legends Trophies ⚜️: {player1_bestPathOfLegendTrophies} | {player2_bestPathOfLegendTrophies}\nWin Rate 🟢: {math.ceil(player1_win_rate)}% | {math.ceil(player2_win_rate)}%\nClan 🏰: {player1_clan} | {player2_clan}\nSeasonal Arena 🏟️: {player1_seasonal_arena} | {player2_seasonal_arena}\nCurrent Rank 🔹: {player1_current_rank_name} | {player2_current_rank_name}\nHighest Rank 🔸: {player1_highest_rank_name} | {player2_highest_rank_name}'
+    elif player1_past_10k_trophies > 10000 and player2_past_10k_trophies <= 10000:
+        return f'Players🫅: {player1_name} | {player2_name}\n\nLevel 🌟: {player1_level} | {player2_level}\nTrophies 🏆: {player1_past_10k_trophies} | {player2_trophies}\nBest Trophies 🥇: {player1_past_10k_best_trophies} | {player2_best_trophies}\nCurrent Path Of Legends Trophies 🏅: {player1_currentPathOfLegendTrophies} | {player2_currentPathOfLegendTrophies}\nBest Path Of Legends Trophies ⚜️: {player1_bestPathOfLegendTrophies} | {player2_bestPathOfLegendTrophies}\nWin Rate 🟢: {math.ceil(player1_win_rate)}% | {math.ceil(player2_win_rate)}%\nClan 🏰: {player1_clan} | {player2_clan}\nArena ⚔️: {player1_arena} | {player2_arena}\nSeasonal Arena 🏟️: {player1_seasonal_arena} | {player2_seasonal_arena}\nCurrent Rank 🔹: {player1_current_rank_name} | {player2_current_rank_name}\nHighest Rank 🔸: {player1_highest_rank_name} | {player2_highest_rank_name}'
+    elif player1_past_10k_trophies <= 10000 and player2_past_10k_trophies > 10000:
+        return f'Players🫅: {player1_name} | {player2_name}\n\nLevel 🌟: {player1_level} | {player2_level}\nTrophies 🏆: {player1_trophies} | {player2_past_10k_trophies}\nBest Trophies 🥇: {player1_best_trophies} | {player2_past_10k_best_trophies}\nCurrent Path Of Legends Trophies 🏅: {player1_currentPathOfLegendTrophies} | {player2_currentPathOfLegendTrophies}\nBest Path Of Legends Trophies ⚜️: {player1_bestPathOfLegendTrophies} | {player2_bestPathOfLegendTrophies}\nWin Rate 🟢: {math.ceil(player1_win_rate)}% | {math.ceil(player2_win_rate)}%\nClan 🏰: {player1_clan} | {player2_clan}\nArena ⚔️: {player1_arena} | {player2_arena}\nSeasonal Arena 🏟️: {player1_seasonal_arena} | {player2_seasonal_arena}\nCurrent Rank 🔹: {player1_current_rank_name} | {player2_current_rank_name}\nHighest Rank 🔸: {player1_highest_rank_name} | {player2_highest_rank_name}'
+    else:
+        return f'Players 🫅: {player1_name} | {player2_name}\n\nLevel 🌟: {player1_level} | {player2_level}\nTrophies 🏆: {player1_trophies} | {player2_trophies}\nBest Trophies 🥇: {player1_best_trophies} | {player2_best_trophies}\nWin Rate 🟢: {math.ceil(player1_win_rate)}% | {math.ceil(player2_win_rate)}%\nArena ⚔️: {player1_arena} | {player2_arena}\nClan 🏰: {player1_clan} | {player2_clan}'
 
 def jprint(data):
    text = json.dumps(data, sort_keys=True, indent=4)

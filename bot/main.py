@@ -6,6 +6,7 @@ from discord import app_commands
 from information_retrieval import get_player_info
 from information_retrieval import get_player_battlelog
 from information_retrieval import get_clan_info
+from information_retrieval import compare_players
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
@@ -43,6 +44,12 @@ async def user_battlelog_command(interaction: discord.Interaction, user_id: str)
 async def clan_info_command(interaction: discord.Interaction, clan_id: str):
     message = get_clan_info(clan_id)
     await interaction.response.send_message(f'Clan Info:\n\n{message}')
+
+@bot.tree.command(name='compare', description='Compare two Clash Royale player stats using their tag ids')
+@app_commands.describe(user_id1='The first player tag id (don\'t include the #)', user_id2='The second player tag id (don\'t include the #)')
+async def compare_command(interaction: discord.Interaction, user_id1: str, user_id2: str):
+    message = compare_players(user_id1, user_id2)
+    await interaction.response.send_message(f'Player Comparison:\n\n{message}')
 
 if __name__ == '__main__':
     if not DISCORD_TOKEN:
