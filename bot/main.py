@@ -2,11 +2,12 @@ import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
-from discord import app_commands
+from discord import app_commands, Embed
 from information_retrieval import get_player_info
 from information_retrieval import get_player_battlelog
 from information_retrieval import get_clan_info
 from information_retrieval import compare_players
+from card_retrieval import get_card_embed
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
@@ -50,6 +51,17 @@ async def clan_info_command(interaction: discord.Interaction, clan_id: str):
 async def compare_command(interaction: discord.Interaction, user_id1: str, user_id2: str):
     message = compare_players(user_id1, user_id2)
     await interaction.response.send_message(f'Player Comparison:\n\n{message}')
+
+@bot.tree.command(name='card_info', description='Get information of any Clash Royale card by its name')
+@app_commands.describe(card_name='Enter the cardn\'s name (has to be exactly as it shows up in the game)')
+async def card_info_command(interaction: discord.Interaction, card_name: str):
+    message = get_card_embed(card_name)
+
+    if isinstance(message, str):
+        await interaction.response.send_message(message)
+        return
+
+    await interaction.response.send_message(embed=message)
 
 if __name__ == '__main__':
     if not DISCORD_TOKEN:
