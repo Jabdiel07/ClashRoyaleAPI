@@ -15,6 +15,14 @@ Discord Bot to retrieve live user information from Clash Royale
 
 ![User Battlelog Example](./screenshots/user_battlelog_example.png)
 
+- /compare to compare stats between two players
+
+![User Comparison Example](./screenshots/user_comparison_example.png)
+
+- /card_info to retrieve information about any card
+
+![Card Info Example](./screenshots/card_info_example.png)
+
 # Prerequisites
 
 - Python 3.8+ installed on your system
