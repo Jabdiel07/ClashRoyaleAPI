@@ -35,30 +35,68 @@ def get_player_battlelog(player_tag):
     
 def user_battlelog_card(data):
     latest_battle = data[0]
-    team = latest_battle.get('team', [])
-    opponent = latest_battle.get('opponent', [])
+    battle_type = latest_battle.get('gameMode', {}).get('name', 'N/A')
 
-    battle_time = latest_battle.get('battleTime', 'N/A')
-    dt = datetime.strptime(battle_time, '%Y%m%dT%H%M%S.%fZ')
-    formatted_battle_time = dt.strftime('%B %d, %Y')
+    if battle_type != 'TeamVsTeam':
+        team = latest_battle.get('team', [])
+        opponent = latest_battle.get('opponent', [])
 
-    player1 = team[0]
-    player_name = player1.get('name', 'Unknown')
-    player_tag = player1.get('tag', 'N/A')
-    player_crowns = player1.get('crowns', 0)
-    player_clan = player1.get('clan', {}).get('name', 'No Clan')
-    player_cards_used, player_evos_used, num_evos_used = get_battlelog_cards(player1)
+        battle_time = latest_battle.get('battleTime', 'N/A')
+        dt = datetime.strptime(battle_time, '%Y%m%dT%H%M%S.%fZ')
+        formatted_battle_time = dt.strftime('%B %d, %Y')
 
-
-    player2 = opponent[0]
-    opponent_name = player2.get('name', 'Unknown')
-    opponent_tag = player2.get('tag', 'N/A')
-    opponent_crowns = player2.get('crowns', 0)
-    opponent_clan = player2.get('clan', {}).get('name', 'No Clan')
-    opponent_cards_used, opponent_evos_used, opponent_num_evos_used = get_battlelog_cards(player2)
+        player1 = team[0]
+        player_name = player1.get('name', 'Unknown')
+        player_tag = player1.get('tag', 'N/A')
+        player_crowns = player1.get('crowns', 0)
+        player_clan = player1.get('clan', {}).get('name', 'No Clan')
+        player_cards_used, player_evos_used, num_evos_used = get_battlelog_cards(player1)
 
 
-    return f'Date of Battle 🕒: {formatted_battle_time}\n\nPlayer Name 🫅: {player_name}\nPlayer Tag #️⃣: {player_tag}\nClan 🏰: {player_clan}\nTowers Destroyed 💥: {player_crowns}\nCards Used 🃏: {player_cards_used}\nEvos Used ♦️:({num_evos_used}): {player_evos_used}\n\nOpponent Name 🫅: {opponent_name}\nPlayer Tag #️⃣: {opponent_tag}\nClan 🏰: {opponent_clan}\nTowers Destroyed 💥: {opponent_crowns}\nCards Used 🃏: {opponent_cards_used}\nEvos Used ♦️:({opponent_num_evos_used}): {opponent_evos_used}'
+        player2 = opponent[0]
+        opponent_name = player2.get('name', 'Unknown')
+        opponent_tag = player2.get('tag', 'N/A')
+        opponent_crowns = player2.get('crowns', 0)
+        opponent_clan = player2.get('clan', {}).get('name', 'No Clan')
+        opponent_cards_used, opponent_evos_used, opponent_num_evos_used = get_battlelog_cards(player2)
+
+        return f'Date of Battle 🕒: {formatted_battle_time}\n\nPlayer Name 🫅: {player_name}\nPlayer Tag #️⃣: {player_tag}\nClan 🏰: {player_clan}\nTowers Destroyed 💥: {player_crowns}\nCards Used 🃏: {player_cards_used}\nEvos Used ♦️:({num_evos_used}): {player_evos_used}\n\nOpponent Name 🫅: {opponent_name}\nPlayer Tag #️⃣: {opponent_tag}\nClan 🏰: {opponent_clan}\nTowers Destroyed 💥: {opponent_crowns}\nCards Used 🃏: {opponent_cards_used}\nEvos Used ♦️:({opponent_num_evos_used}): {opponent_evos_used}'
+    
+    else:
+        team = latest_battle.get('team', [])
+        player1 = team[0]
+        player2 = team[1]
+
+        player1_name = player1.get('name', 'Unknown')
+        player2_name = player2.get('name', 'Unknown')
+        player1_tag = player1.get('tag', 'N/A')
+        player2_tag = player2.get('tag', 'N/A')
+        player1_clan = player1.get('clan', {}).get('name', 'No Clan')
+        player2_clan = player2.get('clan', {}).get('name', 'No Clan')
+        player1_cards_used, player1_evos_used, player1_num_evos_used = get_battlelog_cards(player1)
+        player2_cards_used, player2_evos_used, player2_num_evos_used = get_battlelog_cards(player2)
+        team_crowns = player1.get('crowns', 0)
+
+        opponent = latest_battle.get('opponent', [])
+
+        opponent1 = opponent[0]
+        opponent2 = opponent[1]
+
+        opponent1_name = opponent1.get('name', 'Unknown')
+        opponent2_name = opponent2.get('name', 'Unknown')
+        opponent1_tag = opponent1.get('tag', 'N/A')
+        opponent2_tag = opponent2.get('tag', 'N/A')
+        opponent1_clan = opponent1.get('clan', {}).get('name', 'No Clan')
+        opponent2_clan = opponent2.get('clan', {}).get('name', 'No Clan')
+        opponent1_cards_used, opponent1_evos_used, opponent1_num_evos_used = get_battlelog_cards(opponent1)
+        opponent2_cards_used, opponent2_evos_used, opponent2_num_evos_used = get_battlelog_cards(opponent2)
+        opponent_team_crowns = opponent1.get('crowns', 0)
+
+        battle_time = latest_battle.get('battleTime', 'N/A')
+        dt = datetime.strptime(battle_time, '%Y%m%dT%H%M%S.%fZ')
+        formatted_battle_time = dt.strftime('%B %d, %Y')
+
+        return f'Date of Battle 🕒: {formatted_battle_time}\n\nTeam:\nPlayer Names 🫅: {player1_name}/{player2_name}\nPlayer Tags #️⃣: {player1_tag}/{player2_tag}\nClans 🏰: {player1_clan}/{player2_clan}\n{player1_name} Cards Used 🃏: {player1_cards_used}\n{player1_name} Evos Used ({player1_num_evos_used}) ♦️: {player1_evos_used}\n{player2_name} Cards Used 🃏: {player2_cards_used}\n{player2_name} Evos Used ({player2_num_evos_used}) ♦️: {player2_evos_used}\nTowers Destroyed 💥: {team_crowns}\n\nOpponent Team:\nOpponent Names 🫅: {opponent1_name}/{opponent2_name}\nOpponent Tags #️⃣: {opponent1_tag}/{opponent2_tag}\nClans 🏰: {opponent1_clan}/{opponent2_clan}\n{opponent1_name} Cards Used 🃏: {opponent1_cards_used}\n{opponent1_name} Evos Used ({opponent1_num_evos_used}) ♦️: {opponent1_evos_used}\n{opponent2_name} Cards Used 🃏: {opponent2_cards_used}\n{opponent2_name} Evos Used ({opponent2_num_evos_used}) ♦️: {opponent2_evos_used}\nTowers Destroyed 💥: {opponent_team_crowns}'
 
 def get_battlelog_cards(user):
     cards_used = []
