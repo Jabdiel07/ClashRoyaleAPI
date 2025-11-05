@@ -143,8 +143,8 @@ def create_player_info_card(data):
     player_name = data.get('name', 'Unknown')
     level = data.get('expLevel', 'N/A')
     trophies = data.get('trophies', 'N/A')
-    past_10k_trophies = data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('trophies', 0)
-    past_10k_best_trophies = data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('bestTrophies', 0)
+    past_10k_trophies = data.get('progress', {}).get('seasonal-trophy-road-202511', {}).get('trophies', 0)
+    past_10k_best_trophies = data.get('progress', {}).get('seasonal-trophy-road-202511', {}).get('bestTrophies', 0)
     arena = data.get('arena', {}).get('name', 'N/A')
     best_trophies = data.get('bestTrophies', 'N/A')
     currentPathOfLegendTrophies = data.get('currentPathOfLegendSeasonResult', {}).get('trophies', 0)
@@ -161,7 +161,7 @@ def create_player_info_card(data):
     current_rank_name = ranks.get(current_rank_number, 'N/A')
     highest_rank_name = ranks.get(best_rank_number, 'N/A')
 
-    seasonal_arena = data.get('progress', {}).get('seasonal-trophy-road-202510', {}).get('arena', {}).get('name', 'N/A')
+    seasonal_arena = data.get('progress', {}).get('seasonal-trophy-road-202511', {}).get('arena', {}).get('name', 'N/A')
 
     if past_10k_trophies > 10000 and past_10k_best_trophies > 15000:
         return f'Player 🫅: {player_name}\nPlayer Level 🌟: {level}\nTrophies 🏆: {past_10k_trophies}\nBest Trophies 🥇: {past_10k_best_trophies}\nCurrent Path Of Legends Trophies 🏅: {currentPathOfLegendTrophies}\nBest Path Of Legends Trophies ⚜️: {bestPathOfLegendTrophies}\nCurrent Rank 🔹: {current_rank_name}\nHighest Rank 🔸: {highest_rank_name}\nSeasonal Arena 🏟️: {seasonal_arena}\nWin Rate 🟢: {math.ceil(player_win_rate)}%\nArena ⚔️: {arena}\nClan 🏰: {clan}\nEvos ({num_of_evos}) ♦️: {evos}'
